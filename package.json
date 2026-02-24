@@ -7,7 +7,19 @@
     "start": "node index.js",
     "dev": "node index.js",
     "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:unit": "jest --coverage tests/unit",
+    "test:integration": "jest --coverage tests/integration"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/"
+    ],
+    "setupFilesAfterEnv": [],
+    "verbose": true
   },
   "author": "",
   "license": "ISC",

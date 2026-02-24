@@ -14,7 +14,11 @@ let mongoServer;
  * Connect to the in-memory MongoDB database
  */
 const connect = async () => {
-    mongoServer = await MongoMemoryServer.create();
+    mongoServer = await MongoMemoryServer.create({
+        instance: {
+            launchTimeout: 60000, // 60 seconds
+        }
+    });
     const mongoUri = mongoServer.getUri();
 
     await mongoose.connect(mongoUri);

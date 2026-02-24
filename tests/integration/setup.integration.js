@@ -18,8 +18,12 @@ let managers;
  * Initialize the integration test environment
  */
 const setupIntegrationTests = async () => {
-    // Start MongoDB Memory Server
-    mongoServer = await MongoMemoryServer.create();
+    // Start MongoDB Memory Server with increased timeout
+    mongoServer = await MongoMemoryServer.create({
+        instance: {
+            launchTimeout: 60000, // 60 seconds
+        }
+    });
     const mongoUri = mongoServer.getUri();
 
     // Connect to in-memory MongoDB

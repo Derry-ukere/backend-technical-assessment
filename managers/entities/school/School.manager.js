@@ -252,7 +252,7 @@ module.exports = class School {
         }
 
         if (!school.isActive) {
-            return { error: 'School is already deleted' };
+            return { error: 'School is already inactive' };
         }
 
         // Check if school has active classrooms or students

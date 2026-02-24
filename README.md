@@ -201,7 +201,113 @@ npm test
 
 # Run tests with watch mode
 npm run test:watch
+
+# Run unit tests only
+npm run test:unit
+
+# Run integration tests only
+npm run test:integration
 ```
+
+## Deployment
+
+### Branch Strategy
+
+| Branch | Environment | Docker Tag | Description |
+|--------|-------------|------------|-------------|
+| `develop` | Development | `dev`, `dev-<sha>` | Active development |
+| `staging` | Staging | `staging`, `staging-<sha>` | Pre-production testing |
+| `main` | Production | `latest`, `prod`, `prod-<sha>` | Production releases |
+
+### Docker Hub
+
+The application is automatically built and pushed to Docker Hub based on branch.
+
+**Docker Hub Repository:** `derryukere/school-management-api`
+
+#### Pull Images by Environment
+
+```bash
+# Development
+docker pull derryukere/school-management-api:dev
+
+# Staging
+docker pull derryukere/school-management-api:staging
+
+# Production
+docker pull derryukere/school-management-api:latest
+# or
+docker pull derryukere/school-management-api:prod
+```
+
+#### Run Container
+
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -e MONGO_URI=mongodb://your-mongo-host:27017/school_management \
+  -e REDIS_URI=redis://your-redis-host:6379 \
+  -e CORTEX_REDIS=redis://your-redis-host:6379 \
+  -e CORTEX_PREFIX=sms_cortex \
+  -e CORTEX_TYPE=school-management-api \
+  -e OYSTER_REDIS=redis://your-redis-host:6379 \
+  -e OYSTER_PREFIX=sms_oyster \
+  -e CACHE_REDIS=redis://your-redis-host:6379 \
+  -e CACHE_PREFIX=sms_cache \
+  -e LONG_TOKEN_SECRET=your-secret \
+  -e SHORT_TOKEN_SECRET=your-secret \
+  -e NACL_SECRET=your-secret \
+  derryukere/school-management-api:prod
+```
+
+#### Build Locally
+
+```bash
+# Build the image
+docker build -t school-management-api .
+
+# Tag for Docker Hub
+docker tag school-management-api derryukere/school-management-api:dev
+
+# Push to Docker Hub
+docker push derryukere/school-management-api:dev
+```
+
+### CI/CD Pipeline
+
+The project includes GitHub Actions workflows:
+
+- **CI/CD Pipeline** (`.github/workflows/ci-cd.yml`)
+  - Runs tests on every push and PR
+  - Builds and pushes Docker image with environment-specific tags
+  - `develop` → `:dev`, `:dev-<sha>`
+  - `staging` → `:staging`, `:staging-<sha>`
+  - `main` → `:latest`, `:prod`, `:prod-<sha>`
+
+- **Security Scan** (`.github/workflows/security.yml`)
+  - Weekly dependency audits
+  - Docker image vulnerability scanning
+  - CodeQL analysis for code security
+
+#### Setting up Docker Hub Token
+
+1. Go to [Docker Hub Account Settings](https://hub.docker.com/settings/security)
+2. Create a new Access Token
+3. Add `DOCKER_HUB_TOKEN` secret in your GitHub repository settings
+
+### Production Checklist
+
+Before deploying to production:
+
+- [ ] Set strong, unique values for all secrets (`LONG_TOKEN_SECRET`, `SHORT_TOKEN_SECRET`, `NACL_SECRET`)
+- [ ] Use managed MongoDB (MongoDB Atlas) with authentication
+- [ ] Use managed Redis with authentication (Redis Cloud)
+- [ ] Enable HTTPS/TLS
+- [ ] Configure proper CORS origins
+- [ ] Set up monitoring and logging
+- [ ] Configure rate limiting for your expected load
+- [ ] Set up database backups
+- [ ] Review security headers
 
 ## License
 

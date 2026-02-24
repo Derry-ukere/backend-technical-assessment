@@ -83,6 +83,19 @@ module.exports = class Classroom {
      * @param {Object} params.__longToken - Decoded token from middleware
      */
     async createClassroom({ schoolId, name, capacity, grade, section, resources, academicYear, __longToken }){
+        // Check authentication first
+        if (!__longToken) {
+            return { error: 'Authentication required', code: 401 };
+        }
+
+        // For school_admin, if they explicitly provide a different schoolId, check that first
+        if (__longToken.role === 'school_admin' && schoolId) {
+            const tokenSchoolId = __longToken.schoolId ? __longToken.schoolId.toString() : null;
+            if (schoolId.toString() !== tokenSchoolId) {
+                return { error: 'Access denied. You can only access your assigned school.', code: 403 };
+            }
+        }
+
         // Get effective school ID
         const effectiveSchoolId = this._getEffectiveSchoolId(__longToken, schoolId);
         
@@ -381,7 +394,7 @@ module.exports = class Classroom {
         if (authError) return authError;
 
         if (!classroom.isActive) {
-            return { error: 'Classroom is already deleted' };
+            return { error: 'Classroom is already inactive' };
         }
 
         // Check if classroom has active students

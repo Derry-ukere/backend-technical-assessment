@@ -35,6 +35,16 @@ module.exports = class UserServer {
             res.send(specs);
         });
 
+        /** Health check endpoint for Docker/Kubernetes */
+        app.get('/api/health', (req, res) => {
+            res.status(200).json({
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                service: this.config.dotEnv.SERVICE_NAME || 'school-management-api',
+                uptime: process.uptime()
+            });
+        });
+
         /** an error handler */
         app.use((err, req, res, next) => {
             console.error(err.stack)
