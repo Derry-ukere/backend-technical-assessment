@@ -134,13 +134,11 @@ module.exports = {
     establishedYear: {
         path: 'establishedYear',
         type: 'Number',
-        length: { min: 1800, max: 2100 },
         custom: 'year',
     },
     capacity: {
         path: 'capacity',
         type: 'Number',
-        length: { min: 1, max: 500 },
         custom: 'capacity',
     },
     grade: {

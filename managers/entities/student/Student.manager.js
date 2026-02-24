@@ -64,6 +64,9 @@ module.exports = class Student {
      * @returns {string} Effective school ID
      */
     _getEffectiveSchoolId(token, requestedSchoolId) {
+        if (!token) {
+            return requestedSchoolId;
+        }
         if (token.role === 'superadmin') {
             return requestedSchoolId;
         }
@@ -92,6 +95,19 @@ module.exports = class Student {
         dateOfBirth, gender, guardianName, guardianPhone, 
         guardianEmail, address, __longToken 
     }){
+        // Check authentication first
+        if (!__longToken) {
+            return { error: 'Authentication required', code: 401 };
+        }
+
+        // For school_admin, if they explicitly provide a different schoolId, check that first
+        if (__longToken.role === 'school_admin' && schoolId) {
+            const tokenSchoolId = __longToken.schoolId ? __longToken.schoolId.toString() : null;
+            if (schoolId.toString() !== tokenSchoolId) {
+                return { error: 'Access denied. You can only access students in your assigned school.', code: 403 };
+            }
+        }
+
         // Get effective school ID
         const effectiveSchoolId = this._getEffectiveSchoolId(__longToken, schoolId);
         

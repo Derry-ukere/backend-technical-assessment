@@ -145,18 +145,17 @@ studentSchema.set('toJSON', { virtuals: true });
 studentSchema.set('toObject', { virtuals: true });
 
 // Pre-save middleware to validate classroom belongs to school
-studentSchema.pre('save', async function(next) {
+studentSchema.pre('save', async function() {
     if (this.classroomId && this.isModified('classroomId')) {
         const Classroom = mongoose.model('Classroom');
         const classroom = await Classroom.findById(this.classroomId);
         if (!classroom) {
-            return next(new Error('Classroom not found'));
+            throw new Error('Classroom not found');
         }
         if (classroom.schoolId.toString() !== this.schoolId.toString()) {
-            return next(new Error('Classroom does not belong to the specified school'));
+            throw new Error('Classroom does not belong to the specified school');
         }
     }
-    next();
 });
 
 module.exports = mongoose.model('Student', studentSchema);

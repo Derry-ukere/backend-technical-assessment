@@ -140,20 +140,28 @@ module.exports = class Classroom {
         }
 
         // Create classroom
-        const createdClassroom = await this.mongomodels.classroom.create({
-            schoolId: effectiveSchoolId,
-            name,
-            capacity,
-            grade,
-            section,
-            resources: resources || [],
-            academicYear,
-            createdBy: __longToken.userId
-        });
+        try {
+            const createdClassroom = await this.mongomodels.classroom.create({
+                schoolId: effectiveSchoolId,
+                name,
+                capacity,
+                grade,
+                section,
+                resources: resources || [],
+                academicYear,
+                createdBy: __longToken.userId
+            });
 
-        return {
-            classroom: createdClassroom.toJSON()
-        };
+            return {
+                classroom: createdClassroom.toJSON()
+            };
+        } catch (error) {
+            if (error.name === 'ValidationError') {
+                const errors = Object.values(error.errors).map(e => e.message);
+                return { errors };
+            }
+            throw error;
+        }
     }
 
     /**
